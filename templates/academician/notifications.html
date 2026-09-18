@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Faculty Notifications - SkillBridge{% endblock %}
+{% block page_title %}Faculty Notifications{% endblock %}
+{% block content %}<div class="card card-sb p-4"><div class="d-flex justify-content-between mb-3"><h5 class="fw-bold">Updates for your faculty work</h5><span class="badge bg-primary-subtle text-primary">{{ unread_count }} unread</span></div>{% for item in notifications %}<div class="border-bottom py-3 {% if not item.read %}bg-light{% endif %}"><div class="small text-primary fw-semibold">{{ item.event_type|replace('_', ' ')|title }}</div><div class="small {% if not item.read %}fw-semibold{% endif %}">{{ item.message }}</div><div class="text-muted" style="font-size:.75rem">{{ item.created_at.strftime('%b %d, %Y at %I:%M %p') }}</div></div>{% else %}<div class="text-center text-muted py-5">No faculty notifications yet.</div>{% endfor %}</div>{% endblock %}

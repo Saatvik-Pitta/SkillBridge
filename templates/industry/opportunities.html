@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Opportunities - SkillBridge{% endblock %}
+{% block page_title %}Enterprise Opportunities Management{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card card-sb p-4 bg-white border">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-0">Posted Job & Internship Openings</h5>
+                    <p class="text-muted small mb-0">Create skill-benchmarked opportunities for student discovery.</p>
+                </div>
+                <button class="btn btn-sm btn-sb-primary" data-bs-toggle="modal" data-bs-target="#createOpportunityModal">
+                    <i class="bi bi-plus-circle me-1"></i> Post Opportunity
+                </button>
+            </div>
+
+            {% if opps_data %}
+            <div class="d-flex flex-column gap-3">
+                {% for item in opps_data %}
+                {% set opp = item.opp %}
+                <div class="p-3 border rounded-3 bg-light d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h6 class="fw-bold mb-0">{{ opp.title }}</h6>
+                            <span class="badge {% if opp.status == 'published' %}bg-success{% elif opp.status == 'draft' %}bg-secondary{% else %}bg-danger{% endif %} small">
+                                {{ opp.status|capitalize }}
+                            </span>
+                            <span class="badge bg-white text-dark border small">{{ opp.opportunity_type|capitalize }}</span>
+                        </div>
+                        <div class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>{{ opp.location }} ({{ opp.work_mode }}) · Due: {{ opp.deadline }} · Stipend: {{ opp.stipend_salary }}
+                        </div>
+                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                            <span class="small text-secondary me-1">Required:</span>
+                            {% for sk in opp.required_skills %}
+                            <span class="badge bg-white text-dark border small">{{ sk }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column align-items-md-end gap-2">
+                        <div class="d-flex gap-2 text-center small">
+                            <div class="p-1 px-2 bg-white rounded border">
+                                <div class="fw-bold text-dark">{{ item.total_apps }}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">Applied</div>
+                            </div>
+                            <div class="p-1 px-2 bg-white rounded border">
+                                <div class="fw-bold text-success">{{ item.shortlisted }}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">Shortlisted</div>
+                            </div>
+                            <div class="p-1 px-2 bg-white rounded border">
+                                <div class="fw-bold text-primary">{{ item.interviews }}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">Interview</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('industry.applications', opp_id=opp.id) }}" class="btn btn-sm btn-outline-primary py-1">
+                                View Applicants
+                            </a>
+                            <form method="POST" action="{{ url_for('industry.toggle_opportunity_status', id=opp.id) }}">
+                                <input type="hidden" name="status" value="{% if opp.status == 'published' %}closed{% else %}published{% endif %}">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary py-1">
+                                    {% if opp.status == 'published' %}Close{% else %}Publish{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('industry.delete_opportunity', id=opp.id) }}" onsubmit="return confirm('Remove opportunity?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger py-1" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state py-5">
+                <i class="bi bi-briefcase empty-state-icon"></i>
+                <h6>No opportunities posted yet</h6>
+                <p class="text-muted small">Post an internship or job opening to begin matching qualified student applicants.</p>
+                <button class="btn btn-sm btn-sb-primary" data-bs-toggle="modal" data-bs-target="#createOpportunityModal">Post Opportunity</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CREATE OPPORTUNITY -->
+<div class="modal fade" id="createOpportunityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <form method="POST" action="{{ url_for('industry.create_opportunity') }}">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold">Post New Opportunity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label small fw-semibold">Job / Internship Title</label>
+                            <input type="text" class="form-control form-control-sm" name="title" placeholder="e.g. Python Developer Intern" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Opportunity Type</label>
+                            <select class="form-select form-select-sm" name="opportunity_type">
+                                <option value="internship">Internship</option>
+                                <option value="full-time">Full-Time</option>
+                                <option value="apprenticeship">Apprenticeship</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Role Description</label>
+                            <textarea class="form-control form-control-sm" name="description" rows="3" placeholder="Describe expectations, team context, and responsibilities..." required></textarea>
+                        </div>
+
+                        <!-- Required Skills (Multi-select) -->
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Required Verified Skills (Select 2-5)</label>
+                            <div class="p-2 border rounded bg-light" style="max-height: 140px; overflow-y: auto;">
+                                <div class="row g-1">
+                                    {% for sk in all_skills %}
+                                    <div class="col-md-4">
+                                        <div class="form-check small">
+                                            <input class="form-check-input" type="checkbox" name="required_skills" value="{{ sk.name }}" id="req_sk_{{ loop.index }}">
+                                            <label class="form-check-label" for="req_sk_{{ loop.index }}">{{ sk.name }}</label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Location</label>
+                            <input type="text" class="form-control form-control-sm" name="location" value="{{ company.location }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Work Mode</label>
+                            <select class="form-select form-select-sm" name="work_mode">
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="Remote">Remote</option>
+                                <option value="On-site">On-site</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Duration / Program Length</label>
+                            <input type="text" class="form-control form-control-sm" name="duration" value="3 months">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Application Deadline</label>
+                            <input type="date" class="form-control form-control-sm" name="deadline" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Stipend / Salary</label>
+                            <input type="text" class="form-control form-control-sm" name="stipend_salary" placeholder="e.g. ₹25,000 / month">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Eligibility</label>
+                            <input type="text" class="form-control form-control-sm" name="eligibility" value="2nd-4th year students">
+                        </div>
+
+                        <!-- Dynamic Application Screening Questions -->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold mb-0">Custom Candidate Questions</label>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0" id="btnAddQuestion">
+                                    <i class="bi bi-plus-lg"></i> Add Question
+                                </button>
+                            </div>
+                            <div id="questionsInputContainer" class="d-flex flex-column gap-2">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" name="question_texts" placeholder="e.g. Why are you interested in this role?" value="Why are you interested in this role?">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="submit" name="action" value="draft" class="btn btn-sm btn-outline-secondary">Save as Draft</button>
+                    <button type="submit" name="action" value="publish" class="btn btn-sm btn-sb-primary">Publish Opportunity</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('btnAddQuestion')?.addEventListener('click', () => {
+    const container = document.getElementById('questionsInputContainer');
+    const div = document.createElement('div');
+    div.className = 'input-group input-group-sm';
+    div.innerHTML = `
+        <input type="text" class="form-control" name="question_texts" placeholder="Question text...">
+        <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove();"><i class="bi bi-x"></i></button>
+    `;
+    container.appendChild(div);
+});
+</script>
+{% endblock %}

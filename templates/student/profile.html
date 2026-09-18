@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile - SkillBridge{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- TOP HEADER PROFILE CARD -->
+    <div class="col-12">
+        <div class="card card-sb p-4 bg-white">
+            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary-subtle text-primary border border-primary-subtle rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                        S123
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="fw-bold mb-0">{{ student.name_display }}</h4>
+                            <span class="badge bg-primary-subtle text-primary">Student</span>
+                        </div>
+                        <div class="text-muted small mt-1">
+                            {{ student.college }} · {{ student.branch }} ({{ student.year }}) · <strong>CGPA: {{ student.cgpa }}</strong>
+                        </div>
+                        <p class="text-secondary small mb-0 mt-1" style="max-width: 650px;">
+                            "{{ student.bio }}"
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-sb-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE SUMMARY & COMPLETENESS CARD -->
+    <div class="col-12">
+        <div class="card card-sb p-3 bg-light border">
+            <div class="row align-items-center g-3">
+                <div class="col-md-3 border-end">
+                    <div class="text-muted small">Career Target</div>
+                    <div class="fw-bold text-primary fs-6">{{ student.career_goal }}</div>
+                </div>
+                <div class="col-md-3 border-end">
+                    <div class="text-muted small">Interested Domains (Max 3)</div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        {% for d in student.interested_domains %}
+                        <span class="badge bg-white text-dark border small">{{ d }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-3 border-end">
+                    <div class="text-muted small">Verified Skills & Resume</div>
+                    <div class="small fw-semibold mt-1">
+                        <span class="text-success"><i class="bi bi-patch-check-fill me-1"></i>{{ summary.verified_skills_count }} Verified</span>
+                        · 
+                        {% if summary.has_resume %}
+                        <span class="text-success"><i class="bi bi-file-earmark-check-fill me-1"></i>Resume Uploaded</span>
+                        {% else %}
+                        <span class="text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i>No Resume</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1 small">
+                        <span class="text-muted">Profile Completeness</span>
+                        <span class="fw-bold">{{ summary.completeness }}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ summary.completeness }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: SKILLS (TECHNICAL & SOFT) -->
+    <div class="col-12">
+        <div class="card card-sb">
+            <div class="card-header-sb">
+                <span><i class="bi bi-award-fill text-primary me-2"></i>Verified Skills & Assessments</span>
+                <a href="{{ url_for('student.skill_gap') }}" class="btn btn-sm btn-outline-primary py-1">
+                    Take Assessments <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="card-body-sb">
+                <div class="row g-4">
+                    <!-- Technical Skills -->
+                    <div class="col-md-6 border-end">
+                        <h6 class="fw-bold small text-secondary text-uppercase mb-3">Technical Skills</h6>
+                        {% for sk in tech_skills %}
+                        <div class="skill-bar-container">
+                            <div class="skill-bar-header">
+                                <span class="fw-medium">{{ sk.name }}</span>
+                                <div>
+                                    {% if sk.is_verified and sk.verified_score is not none %}
+                                    <span class="badge-verified me-2">
+                                        <i class="bi bi-check-circle-fill"></i> Verified
+                                    </span>
+                                    <span class="fw-bold text-dark">{{ sk.verified_score }}/100</span>
+                                    {% else %}
+                                    <span class="badge-unassessed">Not Assessed</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="skill-bar-track">
+                                <div class="skill-bar-fill {% if sk.is_verified %}verified{% endif %}" style="width: {{ sk.verified_score or 0 }}%;"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Soft Skills -->
+                    <div class="col-md-6">
+                        <h6 class="fw-bold small text-secondary text-uppercase mb-3">Soft Skills & Communication</h6>
+                        {% for sk in soft_skills %}
+                        <div class="skill-bar-container">
+                            <div class="skill-bar-header">
+                                <span class="fw-medium">{{ sk.name }}</span>
+                                <div>
+                                    {% if sk.is_verified and sk.verified_score is not none %}
+                                    <span class="badge-verified me-2">
+                                        <i class="bi bi-check-circle-fill"></i> Verified
+                                    </span>
+                                    <span class="fw-bold text-dark">{{ sk.verified_score }}/100</span>
+                                    {% else %}
+                                    <span class="badge-unassessed">Not Assessed</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="skill-bar-track">
+                                <div class="skill-bar-fill {% if sk.is_verified %}verified{% endif %}" style="width: {{ sk.verified_score or 0 }}%;"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: PROJECTS -->
+    <div class="col-md-6">
+        <div class="card card-sb h-100">
+            <div class="card-header-sb">
+                <span><i class="bi bi-code-slash text-primary me-2"></i>Academic & Personal Projects</span>
+                <button class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                    <i class="bi bi-plus-lg"></i> Add Project
+                </button>
+            </div>
+            <div class="card-body-sb">
+                {% if student.projects.count() > 0 %}
+                    <div class="d-flex flex-column gap-3">
+                    {% for p in student.projects %}
+                        <div class="p-3 border rounded bg-light position-relative">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="fw-bold mb-1">{{ p.title }}</h6>
+                                <form method="POST" action="{{ url_for('student.delete_project', id=p.id) }}" onsubmit="return confirm('Delete this project?');">
+                                    <button type="submit" class="btn btn-sm text-danger p-0 border-0 bg-transparent" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="text-muted small mb-2">{{ p.description }}</div>
+                            <div class="d-flex flex-wrap align-items-center justify-content-between small text-secondary">
+                                <span><i class="bi bi-tools me-1"></i>{{ p.technologies }}</span>
+                                {% if p.project_url %}
+                                <a href="{{ p.project_url }}" target="_blank" class="text-primary text-decoration-none">
+                                    <i class="bi bi-link-45deg"></i> Repository
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-code-square empty-state-icon"></i>
+                        <p class="text-muted small">No projects added yet.</p>
+                        <button class="btn btn-sm btn-sb-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">Add Project</button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: RESUME & EXTERNAL LINKS -->
+    <div class="col-md-6">
+        <div class="card card-sb mb-4">
+            <div class="card-header-sb">
+                <span><i class="bi bi-file-earmark-pdf text-danger me-2"></i>Resume Management</span>
+            </div>
+            <div class="card-body-sb">
+                {% if student.resume_file_path %}
+                <div class="d-flex align-items-center justify-content-between p-3 border rounded bg-light mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-pdf-fill fs-3 text-danger"></i>
+                        <div>
+                            <div class="fw-semibold small">{{ student.resume_file_path.split('/')[-1] }}</div>
+                            <div class="text-success small"><i class="bi bi-check-circle"></i> Ready for Applications</div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('serve_resume', filename=student.resume_file_path.replace('resumes/', '')) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                            View PDF
+                        </a>
+                        <form method="POST" action="{{ url_for('student.delete_resume') }}" onsubmit="return confirm('Remove stored resume?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-3 border border-dashed rounded text-center mb-3">
+                    <p class="text-muted small mb-0">No resume uploaded yet. Resumes are required for one-click job applications.</p>
+                </div>
+                {% endif %}
+
+                <!-- Upload Form -->
+                <form method="POST" action="{{ url_for('student.upload_resume') }}" enctype="multipart/form-data">
+                    <div class="input-group input-group-sm">
+                        <input type="file" class="form-control" name="resume_file" accept=".pdf" required>
+                        <button class="btn btn-sb-primary" type="submit">Upload PDF</button>
+                    </div>
+                    <div class="text-muted mt-1" style="font-size: 0.75rem;">PDF format only, maximum size 5MB.</div>
+                </form>
+            </div>
+        </div>
+
+        <!-- External Links Card -->
+        <div class="card card-sb">
+            <div class="card-header-sb">
+                <span><i class="bi bi-link-45deg text-primary me-2"></i>External Profiles</span>
+            </div>
+            <div class="card-body-sb">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-items-center justify-content-between p-2 border rounded">
+                        <span class="small fw-semibold"><i class="bi bi-github me-2"></i>GitHub</span>
+                        <a href="{{ student.github_url or '#' }}" target="_blank" class="small text-truncate text-decoration-none" style="max-width: 250px;">
+                            {{ student.github_url or 'Not configured' }}
+                        </a>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between p-2 border rounded">
+                        <span class="small fw-semibold"><i class="bi bi-linkedin me-2 text-primary"></i>LinkedIn</span>
+                        <a href="{{ student.linkedin_url or '#' }}" target="_blank" class="small text-truncate text-decoration-none" style="max-width: 250px;">
+                            {{ student.linkedin_url or 'Not configured' }}
+                        </a>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between p-2 border rounded">
+                        <span class="small fw-semibold"><i class="bi bi-globe me-2 text-info"></i>Portfolio</span>
+                        <a href="{{ student.portfolio_url or '#' }}" target="_blank" class="small text-truncate text-decoration-none" style="max-width: 250px;">
+                            {{ student.portfolio_url or 'Not configured' }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: EDIT PROFILE -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <form method="POST" action="{{ url_for('student.update_profile') }}">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold">Edit Student Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">College / University</label>
+                            <input type="text" class="form-control form-control-sm" name="college" value="{{ student.college }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Branch / Discipline</label>
+                            <input type="text" class="form-control form-control-sm" name="branch" value="{{ student.branch }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Academic Year</label>
+                            <select class="form-select form-select-sm" name="year">
+                                <option value="1st Year" {% if student.year == '1st Year' %}selected{% endif %}>1st Year</option>
+                                <option value="2nd Year" {% if student.year == '2nd Year' %}selected{% endif %}>2nd Year</option>
+                                <option value="3rd Year" {% if student.year == '3rd Year' %}selected{% endif %}>3rd Year</option>
+                                <option value="4th Year" {% if student.year == '4th Year' %}selected{% endif %}>4th Year</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">CGPA (0.0 to 4.0)</label>
+                            <input type="number" step="0.01" min="0" max="4.0" class="form-control form-control-sm" name="cgpa" value="{{ student.cgpa }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Career Goal (Select Exactly One)</label>
+                            <select class="form-select form-select-sm" name="career_goal" required>
+                                {% for cg in available_career_goals %}
+                                <option value="{{ cg }}" {% if student.career_goal == cg %}selected{% endif %}>{{ cg }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="text-muted" style="font-size: 0.75rem;">Your career goal dictates skill gap priorities and learning tracks.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Interested Domains (Maximum 3)</label>
+                            <div class="row g-2">
+                                {% for dm in all_domains %}
+                                <div class="col-md-4">
+                                    <div class="form-check small">
+                                        <input class="form-check-input domain-checkbox" type="checkbox" name="domains" value="{{ dm }}" id="dm_{{ loop.index }}" {% if dm in student.interested_domains %}checked{% endif %}>
+                                        <label class="form-check-label" for="dm_{{ loop.index }}">{{ dm }}</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Short Bio (max 500 characters)</label>
+                            <textarea class="form-control form-control-sm" name="bio" rows="3" maxlength="500">{{ student.bio }}</textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">GitHub URL</label>
+                            <input type="url" class="form-control form-control-sm" name="github_url" value="{{ student.github_url or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">LinkedIn URL</label>
+                            <input type="url" class="form-control form-control-sm" name="linkedin_url" value="{{ student.linkedin_url or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Portfolio Website URL</label>
+                            <input type="url" class="form-control form-control-sm" name="portfolio_url" value="{{ student.portfolio_url or '' }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="submit" class="btn btn-sm btn-sb-primary">Save Changes</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: ADD PROJECT -->
+<div class="modal fade" id="addProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form method="POST" action="{{ url_for('student.add_project') }}">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold">Add Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Project Title</label>
+                        <input type="text" class="form-control form-control-sm" name="title" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Description</label>
+                        <textarea class="form-control form-control-sm" name="description" rows="3" maxlength="500" required></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Technologies Used</label>
+                        <input type="text" class="form-control form-control-sm" name="technologies" placeholder="e.g. Python, SQLite, Flask" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Role</label>
+                        <input type="text" class="form-control form-control-sm" name="role" value="Lead Developer">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Project Repository Link</label>
+                        <input type="url" class="form-control form-control-sm" name="project_url" placeholder="https://github.com/...">
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="submit" class="btn btn-sm btn-sb-primary">Save Project</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Limit domain selections to max 3
+document.querySelectorAll('.domain-checkbox').forEach(chk => {
+    chk.addEventListener('change', () => {
+        const checked = document.querySelectorAll('.domain-checkbox:checked');
+        if (checked.length > 3) {
+            chk.checked = false;
+            alert('Maximum 3 interested domains allowed.');
+        }
+    });
+});
+</script>
+{% endblock %}

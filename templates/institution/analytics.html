@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Institution Analytics - SkillBridge{% endblock %}
+{% block page_title %}Institution Analytics{% endblock %}
+{% block content %}
+<div class="mb-4"><p class="text-muted mb-0">Live analytics calculated from students, assessments, applications, and industry opportunities.</p></div>
+<div class="row g-4">
+    {% for key, title, canvas_id in [('chart1', 'Common Skill Gaps', 'chartSkillGaps'), ('chart2', 'Career Goal Distribution', 'chartCareerGoals'), ('chart3', 'Assessment Completion', 'chartAssessmentRate'), ('chart4', 'Internship Participation', 'chartInternshipParticipation'), ('chart5', 'Career Readiness Distribution', 'chartReadinessDistribution'), ('chart6', 'Industry-Demanded Skills', 'chartIndustryDemands')] %}
+    <div class="col-lg-6"><div class="card card-sb p-4 h-100"><h6 class="fw-bold mb-3">{{ title }}</h6>{% if analytics[key].labels %}<div style="height:260px;position:relative;"><canvas id="{{ canvas_id }}" aria-label="{{ title }} chart"></canvas></div>{% else %}<div class="text-center text-muted py-5">Not enough data yet. This chart will appear as more records are added.</div>{% endif %}</div></div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}<script>document.addEventListener('DOMContentLoaded', () => { initInstitutionAnalytics({{ analytics|tojson }}); });</script>{% endblock %}

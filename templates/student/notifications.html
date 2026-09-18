@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - SkillBridge{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card card-sb p-4 bg-white border">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h5 class="fw-bold mb-0">System & Activity Notifications</h5>
+                    <p class="text-muted small mb-0">Real-time alerts regarding your job applications, assessments, and profile views.</p>
+                </div>
+                {% if unread_count > 0 %}
+                <form method="POST" action="{{ url_for('student.mark_all_notifications_read') }}">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-check2-all me-1"></i> Mark All as Read
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+            <div class="d-flex flex-column gap-2">
+                {% for n in notifications %}
+                <div class="p-3 border rounded-3 d-flex align-items-start justify-content-between {% if not n.read %}bg-light border-primary-subtle fw-semibold{% else %}bg-white opacity-75{% endif %}" id="notif-item-{{ n.id }}">
+                    <div class="d-flex gap-3">
+                        <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
+                            {% if 'application' in n.event_type %}
+                            <i class="bi bi-send-check"></i>
+                            {% elif 'profile' in n.event_type %}
+                            <i class="bi bi-eye"></i>
+                            {% elif 'assessment' in n.event_type %}
+                            <i class="bi bi-award"></i>
+                            {% else %}
+                            <i class="bi bi-bell"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="small mb-1">{{ n.message }}</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">
+                                {{ n.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-3">
+                        {% if not n.read %}
+                        <button class="btn btn-sm btn-light border py-0 px-2 btn-mark-read" data-notif-id="{{ n.id }}" title="Mark Read">
+                            <i class="bi bi-check2"></i>
+                        </button>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('student.delete_notification', id=n.id) }}">
+                            <button type="submit" class="btn btn-sm btn-link text-muted p-0 border-0" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state py-5">
+                <i class="bi bi-bell-slash empty-state-icon"></i>
+                <h6>You're all caught up!</h6>
+                <p class="text-muted small">No notifications at this time.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

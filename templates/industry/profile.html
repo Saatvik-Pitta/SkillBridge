@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Company Profile - SkillBridge{% endblock %}
+{% block page_title %}Company Profile & Overview{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- METRICS SUMMARY OVERVIEW -->
+    <div class="col-12">
+        <div class="card card-sb p-3 bg-light border">
+            <div class="row g-3 text-center">
+                <div class="col-6 col-md-2 border-end">
+                    <div class="text-muted small">Opportunities</div>
+                    <div class="fs-4 fw-bold text-primary">{{ stats.opps_count }}</div>
+                </div>
+                <div class="col-6 col-md-2 border-end">
+                    <div class="text-muted small">Applications</div>
+                    <div class="fs-4 fw-bold text-dark">{{ stats.apps_received }}</div>
+                </div>
+                <div class="col-6 col-md-2 border-end">
+                    <div class="text-muted small">Shortlisted</div>
+                    <div class="fs-4 fw-bold text-success">{{ stats.shortlisted_count }}</div>
+                </div>
+                <div class="col-6 col-md-3 border-end">
+                    <div class="text-muted small">In Interview</div>
+                    <div class="fs-4 fw-bold text-info">{{ stats.interview_count }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Selected / Hired</div>
+                    <div class="fs-4 fw-bold text-success">{{ stats.selected_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE VIEW & EDIT FORM -->
+    <div class="col-lg-7">
+        <div class="card card-sb p-4 bg-white border">
+            <h5 class="fw-bold mb-3">Edit Enterprise Profile</h5>
+            <form method="POST" action="{{ url_for('industry.update_profile') }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Company Name</label>
+                        <input type="text" class="form-control form-control-sm" name="company_name" value="{{ company.company_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Industry Sector</label>
+                        <input type="text" class="form-control form-control-sm" name="industry" value="{{ company.industry }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Headquarters Location</label>
+                        <input type="text" class="form-control form-control-sm" name="location" value="{{ company.location }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Company Size</label>
+                        <select class="form-select form-select-sm" name="company_size">
+                            <option value="Startup (<50)" {% if company.company_size == 'Startup (<50)' %}selected{% endif %}>Startup (<50)</option>
+                            <option value="50-250" {% if company.company_size == '50-250' %}selected{% endif %}>50-250 employees</option>
+                            <option value="250-1000" {% if company.company_size == '250-1000' %}selected{% endif %}>250-1000 employees</option>
+                            <option value="1000+" {% if company.company_size == '1000+' %}selected{% endif %}>Enterprise (1000+)</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Official Website</label>
+                        <input type="url" class="form-control form-control-sm" name="website" value="{{ company.website }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Company Description</label>
+                        <textarea class="form-control form-control-sm" name="description" rows="3">{{ company.description }}</textarea>
+                    </div>
+
+                    <!-- Hiring Interests -->
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Hiring Roles Offered</label>
+                        <div class="p-2 border rounded small bg-light">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="hiring_interests" value="Internships" {% if 'Internships' in company.hiring_interests %}checked{% endif %}>
+                                <label class="form-check-label">Undergraduate Internships</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="hiring_interests" value="Full-time" {% if 'Full-time' in company.hiring_interests %}checked{% endif %}>
+                                <label class="form-check-label">Full-time Entry Positions</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="hiring_interests" value="Apprenticeships" {% if 'Apprenticeships' in company.hiring_interests %}checked{% endif %}>
+                                <label class="form-check-label">Vocational Apprenticeships</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collaboration Interests -->
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Academic Collaboration Interests</label>
+                        <div class="p-2 border rounded small bg-light">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="collaboration_interests" value="Guest Lectures" {% if 'Guest Lectures' in company.collaboration_interests %}checked{% endif %}>
+                                <label class="form-check-label">Guest Lectures & Webinars</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="collaboration_interests" value="Workshops" {% if 'Workshops' in company.collaboration_interests %}checked{% endif %}>
+                                <label class="form-check-label">Faculty Development / Workshops</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="collaboration_interests" value="Live Projects" {% if 'Live Projects' in company.collaboration_interests %}checked{% endif %}>
+                                <label class="form-check-label">Live Student Projects & Hackathons</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-sm btn-sb-primary mt-3">Save Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PUBLIC CARD PREVIEW -->
+    <div class="col-lg-5">
+        <div class="card card-sb p-4 bg-white border">
+            <h6 class="fw-bold text-secondary text-uppercase small mb-3">Student & Public Facing Card</h6>
+            <div class="p-3 border rounded-3 bg-light">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-dark text-white rounded-3 d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 52px; height: 52px;">
+                        {{ company.company_name[0] }}
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ company.company_name }}</h5>
+                        <div class="text-muted small">{{ company.industry }} · {{ company.location }}</div>
+                    </div>
+                </div>
+
+                <p class="small text-secondary mb-3">{{ company.description }}</p>
+
+                <div class="mb-2">
+                    <div class="small fw-semibold text-secondary mb-1">Company Size:</div>
+                    <span class="badge bg-white text-dark border">{{ company.company_size }} employees</span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="small fw-semibold text-secondary mb-1">Hiring Interests:</div>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for h in company.hiring_interests %}
+                        <span class="badge bg-primary-subtle text-primary">{{ h }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="pt-2 border-top small">
+                    <a href="{{ company.website }}" target="_blank" class="text-decoration-none">
+                        <i class="bi bi-link-45deg me-1"></i> {{ company.website }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

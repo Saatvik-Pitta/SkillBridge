@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - SkillBridge{% endblock %}
+
+{% block public_content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-sb p-4 shadow-sm border">
+            <div class="text-center mb-3">
+                <h4 class="fw-bold mb-1">Create your SkillBridge Account</h4>
+                <p class="text-muted small">Select your role to connect with students, industry, or faculty.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Account Role</label>
+                    <select class="form-select" name="role" required>
+                        <option value="student" {% if role == 'student' %}selected{% endif %}>Student (Explore skills, learn, apply to jobs)</option>
+                        <option value="industry" {% if role == 'industry' %}selected{% endif %}>Industry (Post jobs, scout candidates, recruit)</option>
+                        <option value="academician" {% if role == 'academician' %}selected{% endif %}>Academician (Collaborate, FDPs, workshops)</option>
+                        <option value="institution" {% if role == 'institution' %}selected{% endif %}>Institution (Track placement, student metrics)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Full Name / Organization Name</label>
+                    <input type="text" class="form-control" name="name" value="{{ name or '' }}" placeholder="e.g. John Doe / Tech Corp" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Email address</label>
+                    <input type="email" class="form-control" name="email" value="{{ email or '' }}" placeholder="name@domain.com" required>
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Password</label>
+                        <input type="password" class="form-control" name="password" placeholder="••••••••" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Confirm Password</label>
+                        <input type="password" class="form-control" name="confirm_password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <!-- Password Requirements Box -->
+                <div class="p-3 bg-light rounded border mb-3 small">
+                    <div class="fw-semibold text-secondary mb-1">Password Requirements:</div>
+                    <ul class="mb-0 ps-3 text-muted" style="font-size: 0.78rem;">
+                        <li>At least 8 characters long</li>
+                        <li>At least one uppercase letter</li>
+                        <li>At least one number (0-9)</li>
+                        <li>At least one special character (!@#$%^&*)</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn btn-sb-primary w-100 py-2 mb-3">Create Account</button>
+            </form>
+
+            <div class="text-center small text-muted">
+                Already have an account? <a href="{{ url_for('auth.login') }}" class="fw-semibold text-decoration-none">Sign in here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

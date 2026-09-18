@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Discovery - SkillBridge{% endblock %}
+{% block page_title %}Candidate Scouting & Skill Matching{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- SEARCH & FILTER CONTROLS -->
+    <div class="col-12">
+        <div class="card card-sb p-3 bg-white border">
+            <form method="GET" action="{{ url_for('industry.candidates') }}" class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1 text-muted">Benchmark Opportunity</label>
+                    <select class="form-select form-select-sm" name="opportunity_id" onchange="this.form.submit();">
+                        {% for o in opps %}
+                        <option value="{{ o.id }}" {% if target_opp and target_opp.id == o.id %}selected{% endif %}>{{ o.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1 text-muted">Candidate Name</label>
+                    <input type="text" class="form-control form-control-sm" name="name" value="{{ search_name }}" placeholder="e.g. Student 123">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1 text-muted">Min CGPA</label>
+                    <input type="number" step="0.1" min="0" max="4.0" class="form-control form-control-sm" name="min_cgpa" value="{{ min_cgpa or '' }}" placeholder="e.g. 3.5">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1 text-muted">Career Target</label>
+                    <select class="form-select form-select-sm" name="career_goal">
+                        <option value="">All Career Targets</option>
+                        {% for cg in career_goals %}
+                        <option value="{{ cg }}" {% if selected_career_goal == cg %}selected{% endif %}>{{ cg }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1 d-grid mt-auto">
+                    <button type="submit" class="btn btn-sm btn-sb-primary" style="margin-top: 1.5rem;">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CANDIDATES GRID -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">Discovered Qualified Candidates ({{ candidate_cards|length }})</h6>
+            {% if target_opp %}
+            <span class="small text-muted">Compatibility evaluated against: <strong>{{ target_opp.title }}</strong></span>
+            {% endif %}
+        </div>
+
+        {% if candidate_cards %}
+        <div class="row g-3">
+            {% for c in candidate_cards %}
+            {% set st = c.student %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-sb p-3 bg-white border h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold mb-0">{{ st.name_display }}</h6>
+                                <div class="text-muted small">{{ st.college }} · {{ st.branch }} ({{ st.year }})</div>
+                            </div>
+                            <span class="badge {% if c.compatibility >= 75 %}bg-success{% elif c.compatibility >= 50 %}bg-primary{% else %}bg-secondary{% endif %}">
+                                {{ c.compatibility }}% Match
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2 small text-secondary mb-2">
+                            <span>CGPA: <strong>{{ st.cgpa }}</strong></span>
+                            <span>·</span>
+                            <span>Target: <strong>{{ st.career_goal }}</strong></span>
+                        </div>
+
+                        <!-- Verified Skills Chips -->
+                        <div class="mb-3">
+                            <div class="text-muted small mb-1" style="font-size: 0.75rem;">Verified Skills:</div>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for sk in c.verified_skills %}
+                                <span class="badge bg-light text-dark border small">
+                                    {{ sk.name }} ({{ sk.score }})
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+                        <span class="small text-muted">
+                            {% if c.has_resume %}<i class="bi bi-file-earmark-check text-success me-1"></i>Resume Ready{% else %}No resume{% endif %}
+                        </span>
+                        <button class="btn btn-sm btn-sb-primary btn-view-candidate" data-student-id="{{ st.id }}" data-opp-id="{{ target_opp.id if target_opp else '' }}">
+                            View Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state card card-sb p-5">
+            <i class="bi bi-people empty-state-icon"></i>
+            <h5>No candidates found matching criteria</h5>
+            <p class="text-muted small">Try broadening your CGPA or career target filters.</p>
+            <a href="{{ url_for('industry.candidates') }}" class="btn btn-sm btn-sb-primary mx-auto">Reset Filters</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

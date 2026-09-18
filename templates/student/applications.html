@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Applications & Opportunities - SkillBridge{% endblock %}
+{% block page_title %}Applications & Opportunities{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- SECTION 1: ACTIVE APPLICATIONS -->
+    <div class="col-12">
+        <div class="card card-sb p-4 bg-white border">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">My Active Applications</h5>
+                    <p class="text-muted small mb-0">Track real-time progress and status updates from verified hiring partners.</p>
+                </div>
+                <span class="badge bg-primary-subtle text-primary py-2 px-3">
+                    {{ active_apps|length }} Active
+                </span>
+            </div>
+
+            {% if active_apps %}
+            <div class="row g-3">
+                {% for app in active_apps %}
+                <div class="col-md-6">
+                    <div class="card card-sb p-3 bg-light border h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <span class="text-primary small fw-semibold">{{ app.opportunity.company_name if app.opportunity else 'Partner' }}</span>
+                                    <h6 class="fw-bold mb-0">{{ app.opportunity.title if app.opportunity else 'Opportunity' }}</h6>
+                                </div>
+                                <span class="status-badge status-{{ app.status|lower|replace(' ', '-') }}">
+                                    <i class="bi {% if app.status == 'Shortlisted' %}bi-check-circle-fill text-success{% elif app.status == 'Interview' %}bi-calendar-check-fill text-primary{% elif app.status == 'Under Review' %}bi-clock-history text-warning{% else %}bi-send-fill{% endif %}"></i>
+                                    {{ app.status }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between small text-muted mb-2">
+                                <span>Applied: <strong>{{ app.submitted_date.strftime('%b %d, %Y') }}</strong></span>
+                                <span>Skill Match: <strong class="text-primary">{{ app.skill_match_score }}%</strong></span>
+                            </div>
+
+                            <!-- Interactive Visual Status Timeline -->
+                            <div class="pipeline-timeline">
+                                <div class="timeline-step completed">
+                                    <div class="timeline-dot"><i class="bi bi-check"></i></div>
+                                    <div class="timeline-label">Applied</div>
+                                </div>
+                                <div class="timeline-step {% if app.status in ['Under Review', 'Shortlisted', 'Interview', 'Selected'] %}completed{% elif app.status == 'Applied' %}active{% endif %}">
+                                    <div class="timeline-dot">{% if app.status in ['Under Review', 'Shortlisted', 'Interview', 'Selected'] %}<i class="bi bi-check"></i>{% else %}2{% endif %}</div>
+                                    <div class="timeline-label">Review</div>
+                                </div>
+                                <div class="timeline-step {% if app.status in ['Shortlisted', 'Interview', 'Selected'] %}completed{% elif app.status == 'Under Review' %}active{% endif %}">
+                                    <div class="timeline-dot">{% if app.status in ['Shortlisted', 'Interview', 'Selected'] %}<i class="bi bi-check"></i>{% else %}3{% endif %}</div>
+                                    <div class="timeline-label">Shortlisted</div>
+                                </div>
+                                <div class="timeline-step {% if app.status in ['Interview', 'Selected'] %}completed{% elif app.status == 'Shortlisted' %}active{% endif %}">
+                                    <div class="timeline-dot">{% if app.status in ['Interview', 'Selected'] %}<i class="bi bi-check"></i>{% else %}4{% endif %}</div>
+                                    <div class="timeline-label">Interview</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="text-muted small" style="font-size: 0.75rem;">Last update: {{ app.status_updated_date.strftime('%b %d') }}</span>
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-view-opportunity" data-opp-id="{{ app.opportunity_id }}">
+                                View Role Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-4 border border-dashed rounded text-center">
+                <i class="bi bi-send text-muted fs-3 mb-2 d-block"></i>
+                <h6 class="fw-bold mb-1">No active job applications yet</h6>
+                <p class="text-muted small mb-0">Browse verified opportunities below and submit with your verified skills and resume!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- SECTION 2: OPPORTUNITY DISCOVERY (BROWSE & SKILL MATCH) -->
+    <div class="col-12">
+        <div class="card card-sb p-4 bg-white border">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div>
+                    <h5 class="fw-bold mb-0">Discover Opportunities</h5>
+                    <p class="text-muted small mb-0">Skill match calculated against your verified assessments.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('student.applications', sort='match') }}" class="btn btn-sm {% if sort_by == 'match' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-sort-numeric-down me-1"></i> Best Match
+                    </a>
+                    <a href="{{ url_for('student.applications', sort='deadline') }}" class="btn btn-sm {% if sort_by == 'deadline' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-calendar-event me-1"></i> Deadline
+                    </a>
+                </div>
+            </div>
+
+            <!-- Opportunities Grid -->
+            <div class="row g-3">
+                {% for item in opportunities %}
+                {% set opp = item.opp %}
+                {% set match = item.match_info %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="opportunity-card h-100">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <span class="text-muted small fw-semibold">{{ opp.company_name }}</span>
+                                    <h6 class="fw-bold mb-0 text-dark">{{ opp.title }}</h6>
+                                </div>
+                                <span class="skill-match-pill {% if match.match_percentage >= 70 %}match-high{% elif match.match_percentage >= 40 %}match-mid{% else %}match-low{% endif %}">
+                                    {{ match.match_percentage }}% Match
+                                </span>
+                            </div>
+
+                            <div class="text-secondary small mb-2">
+                                <i class="bi bi-geo-alt me-1"></i>{{ opp.location }} · {{ opp.work_mode }} · {{ opp.duration }}
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="text-muted small" style="font-size: 0.75rem;">Required Skills:</div>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    {% for sk in opp.required_skills %}
+                                    <span class="badge bg-light text-dark border small">{{ sk }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="bi bi-clock me-1"></i>Due {{ opp.deadline }}</span>
+                            <button class="btn btn-sm btn-sb-primary btn-view-opportunity" data-opp-id="{{ opp.id }}">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

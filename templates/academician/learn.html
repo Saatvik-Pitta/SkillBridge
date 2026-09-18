@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Faculty Learn - SkillBridge{% endblock %}
+{% block page_title %}Faculty Learning & Development{% endblock %}
+{% block content %}<div class="mb-4"><p class="text-muted">Curated development resources for teaching practice, research, curriculum design, and emerging technology.</p></div><div class="row g-4">{% for item in resources %}<div class="col-md-6"><div class="card card-sb p-4 h-100"><span class="small text-primary fw-semibold">{{ item.category }}</span><h5 class="fw-bold mt-2">{{ item.title }}</h5><p class="text-muted small">{{ item.provider }} · {{ item.duration }}</p><p class="small">{{ item.description }}</p><a class="btn btn-sm btn-outline-primary mt-auto align-self-start" href="{{ item.url }}" target="_blank" rel="noopener">Open resource</a></div></div>{% endfor %}</div>{% endblock %}

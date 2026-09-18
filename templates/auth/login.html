@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - SkillBridge{% endblock %}
+
+{% block public_content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card card-sb auth-card p-4 p-lg-5 shadow-sm border">
+            <div class="text-center mb-4">
+                <div class="brand-icon mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.4rem;">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1">Sign in to SkillBridge</h4>
+                <p class="text-muted small mb-0">A focused workspace for skills, learning, and opportunity.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Email address</label>
+                    <input type="email" class="form-control" name="email" value="{{ email or '' }}" placeholder="student@demo.skillbridge.local" required autofocus>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold mb-0">Password</label>
+                        <span class="small text-primary text-decoration-none" id="togglePasswordBtn" style="cursor: pointer;">
+                            <i class="bi bi-eye"></i> Show
+                        </span>
+                    </div>
+                    <input type="password" class="form-control" name="password" id="passwordInput" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn btn-sb-primary w-100 py-2 mb-3">Sign In</button>
+            </form>
+
+            <!-- Separate demo portals are available only before authentication. -->
+            <div class="border-top pt-3 mt-2">
+                <div class="text-muted small fw-bold text-uppercase mb-2 text-center" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                    Demo portals
+                </div>
+                <p class="text-center text-muted small mb-2">Choose a demo portal here. Your dashboard stays focused on one role.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('auth.switch_role', target_role='student') }}" class="btn btn-sm btn-outline-primary text-start d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-mortarboard me-2"></i> Student 123</span>
+                        <span class="badge bg-primary-subtle text-primary">Student</span>
+                    </a>
+                    <a href="{{ url_for('auth.switch_role', target_role='industry') }}" class="btn btn-sm btn-outline-dark text-start d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-building me-2"></i> Demo Tech Solutions</span>
+                        <span class="badge bg-dark-subtle text-dark">Industry</span>
+                    </a>
+                    <a href="{{ url_for('auth.switch_role', target_role='academician') }}" class="btn btn-sm btn-outline-success text-start d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-person-video3 me-2"></i> Dr. A. Sharma</span>
+                        <span class="badge bg-success-subtle text-success">Faculty</span>
+                    </a>
+                    <a href="{{ url_for('auth.switch_role', target_role='institution') }}" class="btn btn-sm btn-outline-warning text-start d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-shield-check me-2"></i> Demo University</span>
+                        <span class="badge bg-warning-subtle text-warning">Institution</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center mt-3 small text-muted">
+                Don't have an account? <a href="{{ url_for('auth.register') }}" class="fw-semibold text-decoration-none">Register here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('togglePasswordBtn')?.addEventListener('click', function() {
+    const input = document.getElementById('passwordInput');
+    if (input.type === 'password') {
+        input.type = 'text';
+        this.innerHTML = '<i class="bi bi-eye-slash"></i> Hide';
+    } else {
+        input.type = 'password';
+        this.innerHTML = '<i class="bi bi-eye"></i> Show';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SkillBridge - Academia–Industry Collaboration Portal{% endblock %}</title>
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3.3 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% if current_user %}
+    <div class="app-wrapper">
+        <!-- FIXED LEFT SIDEBAR (Desktop / Tablet) -->
+        <aside class="app-sidebar">
+            <a href="/" class="brand-logo">
+                <div class="brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                <span>SkillBridge</span>
+            </a>
+
+            <!-- Active Role Tag -->
+            <div class="px-3 pt-3 pb-1">
+                <span class="role-badge role-badge-{{ current_user.role }}">
+                    <i class="bi bi-person-badge"></i> {{ current_user.role }}
+                </span>
+            </div>
+
+            <!-- Role-Specific Exactly 5 Primary Navigation Items -->
+            <nav class="sidebar-nav">
+                {% if current_user.role == 'student' %}
+                <a href="{{ url_for('student.profile') }}" class="nav-item-link {% if request.endpoint == 'student.profile' %}active{% endif %}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="{{ url_for('student.skill_gap') }}" class="nav-item-link {% if request.endpoint in ['student.skill_gap', 'student.take_assessment', 'student.assessment_result', 'student.assessment_history'] %}active{% endif %}">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Skill Gap</span>
+                </a>
+                <a href="{{ url_for('student.learning') }}" class="nav-item-link {% if request.endpoint == 'student.learning' %}active{% endif %}">
+                    <i class="bi bi-book-half"></i>
+                    <span>Learning</span>
+                </a>
+                <a href="{{ url_for('student.applications') }}" class="nav-item-link {% if request.endpoint == 'student.applications' %}active{% endif %}">
+                    <i class="bi bi-send-check"></i>
+                    <span>Applications</span>
+                </a>
+                <a href="{{ url_for('student.notifications') }}" class="nav-item-link {% if request.endpoint == 'student.notifications' %}active{% endif %}">
+                    <i class="bi bi-bell"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="badge bg-danger ms-auto rounded-pill">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+
+                {% elif current_user.role == 'industry' %}
+                <a href="{{ url_for('industry.profile') }}" class="nav-item-link {% if request.endpoint == 'industry.profile' %}active{% endif %}">
+                    <i class="bi bi-building"></i>
+                    <span>Company Profile</span>
+                </a>
+                <a href="{{ url_for('industry.opportunities') }}" class="nav-item-link {% if request.endpoint == 'industry.opportunities' %}active{% endif %}">
+                    <i class="bi bi-briefcase"></i>
+                    <span>Opportunities</span>
+                </a>
+                <a href="{{ url_for('industry.candidates') }}" class="nav-item-link {% if request.endpoint == 'industry.candidates' %}active{% endif %}">
+                    <i class="bi bi-people"></i>
+                    <span>Candidates</span>
+                </a>
+                <a href="{{ url_for('industry.applications') }}" class="nav-item-link {% if request.endpoint == 'industry.applications' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-person"></i>
+                    <span>Applications</span>
+                </a>
+                <a href="{{ url_for('industry.notifications') }}" class="nav-item-link {% if request.endpoint == 'industry.notifications' %}active{% endif %}">
+                    <i class="bi bi-bell"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="badge bg-danger ms-auto rounded-pill">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+
+                {% elif current_user.role == 'academician' %}
+                <a href="{{ url_for('academician.profile') }}" class="nav-item-link {% if request.endpoint == 'academician.profile' %}active{% endif %}">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="{{ url_for('academician.opportunities') }}" class="nav-item-link {% if request.endpoint == 'academician.opportunities' %}active{% endif %}">
+                    <i class="bi bi-award"></i>
+                    <span>Opportunities</span>
+                </a>
+                <a href="{{ url_for('academician.collaboration') }}" class="nav-item-link {% if request.endpoint == 'academician.collaboration' %}active{% endif %}">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>Collaboration</span>
+                </a>
+                <a href="{{ url_for('academician.learn') }}" class="nav-item-link {% if request.endpoint == 'academician.learn' %}active{% endif %}">
+                    <i class="bi bi-mortarboard"></i>
+                    <span>Learn</span>
+                </a>
+                <a href="{{ url_for('academician.notifications') }}" class="nav-item-link {% if request.endpoint == 'academician.notifications' %}active{% endif %}">
+                    <i class="bi bi-bell"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="badge bg-danger ms-auto rounded-pill">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+
+                {% elif current_user.role == 'institution' %}
+                <a href="{{ url_for('institution.dashboard') }}" class="nav-item-link {% if request.endpoint == 'institution.dashboard' %}active{% endif %}">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('institution.students') }}" class="nav-item-link {% if request.endpoint == 'institution.students' %}active{% endif %}">
+                    <i class="bi bi-mortarboard"></i>
+                    <span>Students</span>
+                </a>
+                <a href="{{ url_for('institution.industry') }}" class="nav-item-link {% if request.endpoint == 'institution.industry' %}active{% endif %}">
+                    <i class="bi bi-building"></i>
+                    <span>Industry</span>
+                </a>
+                <a href="{{ url_for('institution.analytics') }}" class="nav-item-link {% if request.endpoint == 'institution.analytics' %}active{% endif %}">
+                    <i class="bi bi-pie-chart"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="{{ url_for('institution.notifications') }}" class="nav-item-link {% if request.endpoint == 'institution.notifications' %}active{% endif %}">
+                    <i class="bi bi-bell"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="badge bg-danger ms-auto rounded-pill">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+                {% endif %}
+            </nav>
+
+            <!-- Current role & user footer -->
+            <div class="p-3 border-top mt-auto">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                            {{ current_user.email[0]|upper }}
+                        </div>
+                        <div class="text-truncate">
+                            <div class="small fw-semibold text-truncate">{{ current_user.email }}</div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 px-2" title="Log out of SkillBridge">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Log out</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN APP CONTENT WRAPPER -->
+        <div class="app-main">
+            <!-- Top Header -->
+            <header class="app-header">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarToggle">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold">{% block page_title %}Dashboard{% endblock %}</h5>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{% if current_user.role == 'student' %}{{ url_for('student.notifications') }}{% elif current_user.role == 'industry' %}{{ url_for('industry.notifications') }}{% elif current_user.role == 'academician' %}{{ url_for('academician.notifications') }}{% else %}{{ url_for('institution.notifications') }}{% endif %}" class="btn btn-sm btn-light position-relative border" title="Notifications">
+                        <i class="bi bi-bell"></i>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                            {{ unread_notifications_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                </div>
+            </header>
+
+            <!-- Flash Alert Messages -->
+            <main class="app-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mb-3">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show small d-flex align-items-center shadow-sm" role="alert">
+                                <i class="bi {% if category == 'success' %}bi-check-circle-fill text-success{% elif category == 'danger' %}bi-exclamation-triangle-fill text-danger{% else %}bi-info-circle-fill text-primary{% endif %} me-2 fs-5"></i>
+                                <div>{{ message }}</div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+
+        <!-- FIXED BOTTOM NAVIGATION BAR (Mobile view only) -->
+        <nav class="mobile-bottom-nav">
+            {% if current_user.role == 'student' %}
+            <a href="{{ url_for('student.profile') }}" class="mobile-nav-item {% if request.endpoint == 'student.profile' %}active{% endif %}">
+                <i class="bi bi-person-circle"></i>
+                <span>Profile</span>
+            </a>
+            <a href="{{ url_for('student.skill_gap') }}" class="mobile-nav-item {% if request.endpoint in ['student.skill_gap', 'student.take_assessment'] %}active{% endif %}">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>Gaps</span>
+            </a>
+            <a href="{{ url_for('student.learning') }}" class="mobile-nav-item {% if request.endpoint == 'student.learning' %}active{% endif %}">
+                <i class="bi bi-book-half"></i>
+                <span>Learn</span>
+            </a>
+            <a href="{{ url_for('student.applications') }}" class="mobile-nav-item {% if request.endpoint == 'student.applications' %}active{% endif %}">
+                <i class="bi bi-send-check"></i>
+                <span>Apply</span>
+            </a>
+            <a href="{{ url_for('student.notifications') }}" class="mobile-nav-item {% if request.endpoint == 'student.notifications' %}active{% endif %}">
+                <i class="bi bi-bell"></i>
+                <span>Alerts</span>
+            </a>
+
+            {% elif current_user.role == 'industry' %}
+            <a href="{{ url_for('industry.profile') }}" class="mobile-nav-item {% if request.endpoint == 'industry.profile' %}active{% endif %}">
+                <i class="bi bi-building"></i>
+                <span>Company</span>
+            </a>
+            <a href="{{ url_for('industry.opportunities') }}" class="mobile-nav-item {% if request.endpoint == 'industry.opportunities' %}active{% endif %}">
+                <i class="bi bi-briefcase"></i>
+                <span>Opps</span>
+            </a>
+            <a href="{{ url_for('industry.candidates') }}" class="mobile-nav-item {% if request.endpoint == 'industry.candidates' %}active{% endif %}">
+                <i class="bi bi-people"></i>
+                <span>Candidates</span>
+            </a>
+            <a href="{{ url_for('industry.applications') }}" class="mobile-nav-item {% if request.endpoint == 'industry.applications' %}active{% endif %}">
+                <i class="bi bi-file-earmark-person"></i>
+                <span>Recruit</span>
+            </a>
+            <a href="{{ url_for('industry.notifications') }}" class="mobile-nav-item {% if request.endpoint == 'industry.notifications' %}active{% endif %}">
+                <i class="bi bi-bell"></i>
+                <span>Alerts</span>
+            </a>
+
+            {% elif current_user.role == 'academician' %}
+            <a href="{{ url_for('academician.profile') }}" class="mobile-nav-item {% if request.endpoint == 'academician.profile' %}active{% endif %}">
+                <i class="bi bi-person-lines-fill"></i>
+                <span>Profile</span>
+            </a>
+            <a href="{{ url_for('academician.opportunities') }}" class="mobile-nav-item {% if request.endpoint == 'academician.opportunities' %}active{% endif %}">
+                <i class="bi bi-award"></i>
+                <span>Programs</span>
+            </a>
+            <a href="{{ url_for('academician.collaboration') }}" class="mobile-nav-item {% if request.endpoint == 'academician.collaboration' %}active{% endif %}">
+                <i class="bi bi-diagram-3"></i>
+                <span>Collab</span>
+            </a>
+            <a href="{{ url_for('academician.learn') }}" class="mobile-nav-item {% if request.endpoint == 'academician.learn' %}active{% endif %}">
+                <i class="bi bi-mortarboard"></i>
+                <span>Learn</span>
+            </a>
+            <a href="{{ url_for('academician.notifications') }}" class="mobile-nav-item {% if request.endpoint == 'academician.notifications' %}active{% endif %}">
+                <i class="bi bi-bell"></i>
+                <span>Alerts</span>
+            </a>
+
+            {% elif current_user.role == 'institution' %}
+            <a href="{{ url_for('institution.dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'institution.dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Overview</span>
+            </a>
+            <a href="{{ url_for('institution.students') }}" class="mobile-nav-item {% if request.endpoint == 'institution.students' %}active{% endif %}">
+                <i class="bi bi-mortarboard"></i>
+                <span>Students</span>
+            </a>
+            <a href="{{ url_for('institution.industry') }}" class="mobile-nav-item {% if request.endpoint == 'institution.industry' %}active{% endif %}">
+                <i class="bi bi-building"></i>
+                <span>Industry</span>
+            </a>
+            <a href="{{ url_for('institution.analytics') }}" class="mobile-nav-item {% if request.endpoint == 'institution.analytics' %}active{% endif %}">
+                <i class="bi bi-pie-chart"></i>
+                <span>Metrics</span>
+            </a>
+            <a href="{{ url_for('institution.notifications') }}" class="mobile-nav-item {% if request.endpoint == 'institution.notifications' %}active{% endif %}">
+                <i class="bi bi-bell"></i>
+                <span>Alerts</span>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- GLOBAL MODAL: OPPORTUNITY DETAILS (FOCUSED POPUP, NO SCROLL OF BACKGROUND) -->
+    <div class="modal fade" id="opportunityDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom">
+                    <div>
+                        <span class="text-primary small fw-semibold" id="modalOppCompany"></span>
+                        <h5 class="modal-title fw-bold" id="modalOppTitle"></h5>
+                        <div class="text-muted small" id="modalOppMeta"></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Match percentage card -->
+                    <div class="card card-sb p-3 mb-3 bg-light border">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="fw-semibold">Calculated Skill Match</span>
+                            <span class="badge" id="modalOppMatchScore" style="font-size: 0.95rem;"></span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6 border-end">
+                                <div class="small fw-semibold text-secondary mb-1">Why You Match:</div>
+                                <ul class="list-unstyled mb-0 ps-1" id="modalOppWhyMatch"></ul>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="small fw-semibold text-secondary mb-1">Skills to Improve:</div>
+                                <ul class="list-unstyled mb-0 ps-1" id="modalOppGapSkills"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Required Skills -->
+                    <div class="mb-3">
+                        <div class="small fw-semibold text-secondary mb-1">Required Skills:</div>
+                        <div id="modalOppReqSkills"></div>
+                    </div>
+
+                    <!-- Details Grid -->
+                    <div class="row g-2 p-3 bg-white border rounded mb-3 small">
+                        <div class="col-6 col-md-4"><strong>Deadline:</strong> <span id="modalOppDeadline"></span></div>
+                        <div class="col-6 col-md-4"><strong>Stipend/Salary:</strong> <span id="modalOppStipend"></span></div>
+                        <div class="col-12 col-md-4"><strong>Eligibility:</strong> <span id="modalOppEligibility"></span></div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <div class="small fw-semibold text-secondary mb-1">About the Role:</div>
+                        <p class="small text-muted mb-0" id="modalOppDesc" style="white-space: pre-line;"></p>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center text-muted small pt-2 border-top">
+                        <span>Source: <a href="#" target="_blank" id="modalOppSource" class="text-decoration-none">Company Careers Portal</a></span>
+                        <span id="modalOppDateRetrieved"></span>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <span id="modalAlreadyAppliedNotice" class="badge bg-success small py-2 px-3 d-none">
+                        <i class="bi bi-check-circle me-1"></i> Already Applied
+                    </span>
+                    <button type="button" class="btn btn-sm btn-sb-primary" id="modalBtnApply">Apply in SkillBridge</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL MODAL: APPLY FORM -->
+    <div class="modal fade" id="applicationFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <form id="applyForm" method="POST" enctype="multipart/form-data">
+                    <div class="modal-header border-bottom">
+                        <div>
+                            <span class="text-primary small fw-semibold" id="applyModalCompany"></span>
+                            <h5 class="modal-title fw-bold">Apply: <span id="applyModalOppTitle"></span></h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <!-- Resume Selection -->
+                        <div class="mb-4 p-3 bg-light rounded border">
+                            <h6 class="fw-bold mb-2">Resume Selection</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="resume_choice" id="resumeChoiceStored" value="stored" checked>
+                                <label class="form-check-label small" for="resumeChoiceStored" id="storedResumeLabel">
+                                    Use stored resume
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="resume_choice" id="resumeChoiceNew" value="new">
+                                <label class="form-check-label small" for="resumeChoiceNew">
+                                    Upload a different resume (.pdf only, max 5MB)
+                                </label>
+                            </div>
+                            <div class="mt-2 ps-4">
+                                <input class="form-control form-control-sm" type="file" name="new_resume_file" accept=".pdf">
+                            </div>
+                        </div>
+
+                        <!-- Application Screening Questions -->
+                        <h6 class="fw-bold mb-2">Application Questions</h6>
+                        <div id="applyModalQuestionsContainer"></div>
+                    </div>
+                    <div class="modal-footer border-top bg-light">
+                        <button type="submit" class="btn btn-sm btn-sb-primary">Submit Application</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL MODAL: CANDIDATE PROFILE (Industry View) -->
+    <div class="modal fade" id="candidateProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="candModalName">Candidate Profile</h5>
+                        <div class="text-muted small" id="candModalCollege"></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
+                        <div>
+                            <span class="badge bg-secondary me-2" id="candModalCGPA"></span>
+                            <span class="small fw-semibold" id="candModalGoal"></span>
+                        </div>
+                        <div id="candModalCompatibilityContainer" class="d-none">
+                            <span class="badge bg-success py-2 px-3 fw-bold" id="candModalCompScore"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold small text-secondary">Candidate Bio</h6>
+                        <p class="small text-muted mb-0" id="candModalBio"></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold small text-secondary">Verified Skills & Scores</h6>
+                        <div id="candModalSkills"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold small text-secondary">Projects</h6>
+                        <div id="candModalProjects"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- PUBLIC HEADER (LOGIN / REGISTER) -->
+    <div class="public-shell min-vh-100 d-flex flex-column justify-content-between">
+        <header class="py-3 px-4 bg-white border-bottom shadow-sm">
+            <div class="container d-flex align-items-center justify-content-between">
+                <a href="/" class="brand-logo p-0 border-0">
+                    <div class="brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                    <span class="fs-4">SkillBridge</span>
+                </a>
+                <div>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-sb-outline me-2">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-sb-primary">Register</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="py-5">
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="row justify-content-center mb-3">
+                            <div class="col-md-6">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show small d-flex align-items-center" role="alert">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <div>{{ message }}</div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block public_content %}{% endblock %}
+            </div>
+        </main>
+
+        <footer class="py-3 bg-white border-top text-center text-muted small">
+            SkillBridge &copy; 2026. Real-world Academia–Industry Collaboration Platform.
+        </footer>
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js 4.4.2 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <!-- Custom Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

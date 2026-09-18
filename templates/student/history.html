@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment History & Progress - SkillBridge{% endblock %}
+{% block page_title %}Assessment History & Progress{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- PROGRESS TREND CHART -->
+    <div class="col-12">
+        <div class="card card-sb p-4 bg-white border">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">Assessment Progress Trend</h5>
+                    <p class="text-muted small mb-0">Track continuous score improvement across assessment attempts.</p>
+                </div>
+                <a href="{{ url_for('student.skill_gap') }}" class="btn btn-sm btn-sb-primary">
+                    <i class="bi bi-award me-1"></i> Available Assessments
+                </a>
+            </div>
+            <div style="height: 260px;">
+                <canvas id="historyChartCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ATTEMPTS TABLE -->
+    <div class="col-12">
+        <div class="card card-sb p-4 bg-white border">
+            <h5 class="fw-bold mb-3">Past Assessment Submissions</h5>
+            {% if attempts %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Skill</th>
+                            <th>Date Attempted</th>
+                            <th>Raw Score</th>
+                            <th>Percentage</th>
+                            <th>Credential Status</th>
+                            <th>Retake Eligible</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for att in attempts %}
+                        <tr>
+                            <td class="fw-bold">{{ att.assessment.skill.name if att.assessment and att.assessment.skill else 'Skill' }}</td>
+                            <td class="text-muted">{{ att.submitted_date.strftime('%b %d, %Y (%I:%M %p)') }}</td>
+                            <td>{{ att.score }} / {{ att.total_questions }}</td>
+                            <td><span class="badge bg-primary fs-6">{{ att.percentage }}%</span></td>
+                            <td>
+                                <span class="badge-verified">
+                                    <i class="bi bi-check-circle-fill"></i> Verified
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('student.assessment_result', attempt_id=att.id) }}" class="btn btn-sm btn-outline-secondary py-0 px-2">
+                                    Review Answers
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state py-5">
+                <i class="bi bi-journal-text empty-state-icon"></i>
+                <h6>No past assessments on record</h6>
+                <p class="text-muted small">Take your first skill assessment to earn verified credentials!</p>
+                <a href="{{ url_for('student.skill_gap') }}" class="btn btn-sm btn-sb-primary">Explore Assessments</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const historyData = {{ history_by_skill|tojson }};
+    initHistoryChart('historyChartCanvas', historyData);
+});
+</script>
+{% endblock %}

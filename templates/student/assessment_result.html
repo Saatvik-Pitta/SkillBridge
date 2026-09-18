@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Results - SkillBridge{% endblock %}
+{% block page_title %}Assessment Submission Result{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- SCORE OVERVIEW CARD -->
+        <div class="card card-sb p-4 mb-4 text-center bg-white border">
+            <div class="mb-3">
+                <span class="badge-verified fs-6 py-2 px-3">
+                    <i class="bi bi-patch-check-fill me-1"></i> Verified Skill Credential Earned
+                </span>
+            </div>
+            
+            <h2 class="fw-bold mb-1">{{ assessment.skill.name }} Assessment</h2>
+            <div class="text-muted small mb-4">Submitted on {{ attempt.submitted_date.strftime('%B %d, %Y at %I:%M %p') }}</div>
+
+            <div class="d-flex justify-content-center align-items-center gap-4 mb-4">
+                <div class="p-3 border rounded bg-light" style="min-width: 140px;">
+                    <div class="text-muted small">Score Percentage</div>
+                    <div class="fs-2 fw-bold text-primary">{{ attempt.percentage }}%</div>
+                </div>
+                <div class="p-3 border rounded bg-light" style="min-width: 140px;">
+                    <div class="text-muted small">Correct Answers</div>
+                    <div class="fs-2 fw-bold text-success">{{ attempt.score }} / {{ attempt.total_questions }}</div>
+                </div>
+                <div class="p-3 border rounded bg-light" style="min-width: 140px;">
+                    <div class="text-muted small">Incorrect Answers</div>
+                    <div class="fs-2 fw-bold text-danger">{{ attempt.total_questions - attempt.score }}</div>
+                </div>
+            </div>
+
+            <!-- Verdict Note -->
+            <div class="p-3 bg-light rounded border small mb-4 mx-auto" style="max-width: 600px;">
+                {% if attempt.percentage >= 70 %}
+                <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Outstanding Performance!</strong> You have demonstrated solid verified competency in {{ assessment.skill.name }}. Your skill gap has been reduced.
+                {% else %}
+                <strong class="text-warning"><i class="bi bi-info-circle-fill me-1"></i> Passing Score Recorded.</strong> Review the explanations below and check your personalized learning recommendations to strengthen weak topics before retaking.
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ url_for('student.skill_gap') }}" class="btn btn-sm btn-sb-primary">
+                    <i class="bi bi-graph-up me-1"></i> View Updated Skill Gaps
+                </a>
+                <a href="{{ url_for('student.learning', skill=assessment.skill.name) }}" class="btn btn-sm btn-sb-outline">
+                    <i class="bi bi-book me-1"></i> Recommended Resources
+                </a>
+            </div>
+        </div>
+
+        <!-- TOPIC BREAKDOWN CARD -->
+        {% if attempt.topic_breakdown %}
+        <div class="card card-sb p-4 mb-4 bg-white border">
+            <h6 class="fw-bold mb-3">Topic Performance Breakdown</h6>
+            <div class="row g-2">
+                {% for topic, stats in attempt.topic_breakdown.items() %}
+                <div class="col-md-4">
+                    <div class="p-3 border rounded bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold small">{{ topic }}</span>
+                            <span class="badge bg-white text-dark border">{{ stats.correct }} / {{ stats.total }}</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar {% if stats.correct == stats.total %}bg-success{% elif stats.correct > 0 %}bg-primary{% else %}bg-danger{% endif %}" style="width: {{ (stats.correct / stats.total * 100)|round }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- DETAILED ANSWERS REVIEW WITH EXPLANATIONS -->
+        <div class="card card-sb p-4 bg-white border">
+            <h6 class="fw-bold mb-3">Answers & Conceptual Explanations</h6>
+            <div class="accordion" id="accordionReview">
+                {% for ans in attempt.answers %}
+                <div class="accordion-item mb-2 border rounded">
+                    <h2 class="accordion-header" id="heading_{{ loop.index }}">
+                        <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ loop.index }}">
+                            <span class="me-2">
+                                {% if ans.is_correct %}
+                                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                {% else %}
+                                <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                                {% endif %}
+                            </span>
+                            <span class="small fw-semibold">Question {{ loop.index }} (Topic: {{ ans.topic }})</span>
+                            <span class="badge {% if ans.is_correct %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} ms-auto me-3 small">
+                                {% if ans.is_correct %}Correct{% else %}Incorrect{% endif %}
+                            </span>
+                        </button>
+                    </h2>
+                    <div id="collapse_{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#accordionReview">
+                        <div class="accordion-body p-3 bg-light small">
+                            <div class="p-3 bg-white rounded border mb-2">
+                                <div class="text-muted fw-semibold mb-1">Conceptual Explanation:</div>
+                                <div class="text-secondary">{{ ans.explanation }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Retake Rule Information -->
+            <div class="mt-4 p-3 bg-light rounded text-center small text-muted border">
+                <i class="bi bi-clock-history me-1"></i> Retake Policy: Assessments can be retaken once every 5 days. Next retake eligibility: <strong>{{ attempt.next_retake_date.strftime('%B %d, %Y') }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

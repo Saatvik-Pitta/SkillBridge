@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Personalized Learning - SkillBridge{% endblock %}
+{% block page_title %}Personalized Learning Resources{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- SECTION 1: RECOMMENDED FOR YOU (PERSONALIZED RATIONALE) -->
+    <div class="col-12">
+        <div class="card card-sb p-4 bg-white border">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">Recommended for {{ student.name_display }}</h5>
+                    <p class="text-muted small mb-0">
+                        Contextual recommendations generated dynamically from your <strong>{{ student.career_goal }}</strong> goal and active skill gaps.
+                    </p>
+                </div>
+                <span class="badge bg-primary-subtle text-primary py-2 px-3">
+                    <i class="bi bi-stars me-1"></i> Personalized Track
+                </span>
+            </div>
+
+            <div class="row g-3">
+                {% for r in top_recommended %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card card-sb p-3 h-100 bg-light border d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-white text-dark border small">{{ r.difficulty }}</span>
+                                <span class="small text-muted"><i class="bi bi-clock me-1"></i>{{ r.duration }}</span>
+                            </div>
+                            <h6 class="fw-bold mb-1 text-truncate" title="{{ r.title }}">{{ r.title }}</h6>
+                            <div class="small text-primary fw-medium mb-2">{{ r.provider }}</div>
+                            <div class="p-2 bg-white rounded border small text-secondary mb-3" style="font-size: 0.76rem;">
+                                <i class="bi bi-lightbulb-fill text-warning me-1"></i>{{ r.custom_reason }}
+                            </div>
+                        </div>
+                        <a href="{{ r.external_url }}" target="_blank" class="btn btn-sm btn-sb-primary w-100">
+                            Open Resource <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: SEARCH & FILTERS -->
+    <div class="col-12">
+        <div class="card card-sb p-3 bg-white border">
+            <form method="GET" action="{{ url_for('student.learning') }}" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" name="search" value="{{ search_query }}" placeholder="Search tutorials, courses, topics...">
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <select class="form-select form-select-sm" name="skill">
+                        <option value="">All Skills</option>
+                        {% for sk in all_skills %}
+                        <option value="{{ sk.name }}" {% if active_skill == sk.name %}selected{% endif %}>{{ sk.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select form-select-sm" name="difficulty">
+                        <option value="">All Difficulties</option>
+                        <option value="Beginner" {% if active_difficulty == 'Beginner' %}selected{% endif %}>Beginner</option>
+                        <option value="Intermediate" {% if active_difficulty == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                        <option value="Advanced" {% if active_difficulty == 'Advanced' %}selected{% endif %}>Advanced</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select form-select-sm" name="category">
+                        <option value="">All Categories</option>
+                        {% for c in categories %}
+                        <option value="{{ c }}" {% if active_category == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-1 d-grid">
+                    <button type="submit" class="btn btn-sm btn-sb-primary">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECTION 3: ALL LEARNING RESOURCES GRID -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">Verified Learning Library ({{ total_count }})</h6>
+            {% if active_skill or active_category or active_difficulty or search_query %}
+            <a href="{{ url_for('student.learning') }}" class="small text-danger text-decoration-none">
+                <i class="bi bi-x-circle me-1"></i> Clear all filters
+            </a>
+            {% endif %}
+        </div>
+
+        {% if resources %}
+        <div class="row g-3">
+            {% for res in resources %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-sb h-100 p-3 bg-white d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-light text-secondary border small">{{ res.category }}</span>
+                            <span class="badge {% if res.difficulty == 'Beginner' %}bg-success-subtle text-success{% elif res.difficulty == 'Intermediate' %}bg-primary-subtle text-primary{% else %}bg-warning-subtle text-dark{% endif %} small">
+                                {{ res.difficulty }}
+                            </span>
+                        </div>
+                        <h6 class="fw-bold mb-1">{{ res.title }}</h6>
+                        <div class="text-muted small mb-2"><i class="bi bi-person-workspace me-1"></i>{{ res.provider }} · <i class="bi bi-clock ms-1 me-1"></i>{{ res.duration }}</div>
+                        <p class="text-secondary small mb-3" style="min-height: 40px;">
+                            {{ res.description }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <div class="p-2 bg-light rounded border small text-muted mb-3" style="font-size: 0.74rem;">
+                            <strong>Why:</strong> {{ res.custom_reason or res.why_recommended }}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-dark border small"><i class="bi bi-tag me-1"></i>{{ res.resource_type }}</span>
+                            <a href="{{ res.external_url }}" target="_blank" class="btn btn-sm btn-sb-outline">
+                                View Material <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state card card-sb p-5">
+            <i class="bi bi-journal-x empty-state-icon"></i>
+            <h5>No resources match your filters</h5>
+            <p class="text-muted small">Try adjusting your skill, difficulty, or category search filters.</p>
+            <a href="{{ url_for('student.learning') }}" class="btn btn-sm btn-sb-primary mx-auto">Browse All Resources</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Faculty Profile - SkillBridge{% endblock %}
+{% block page_title %}Faculty Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8"><div class="card card-sb p-4">
+    <div class="d-flex justify-content-between align-items-start mb-4"><div><span class="text-muted small text-uppercase">Professional profile</span><h3 class="fw-bold mb-1">{{ faculty.name_display }}</h3><p class="text-muted mb-0">{{ faculty.designation }} · {{ faculty.department }}</p></div><span class="badge bg-primary-subtle text-primary">{{ faculty.experience_years }} years experience</span></div>
+    <form method="POST" action="{{ url_for('academician.update_profile') }}" class="row g-3">
+      <div class="col-md-6"><label class="form-label small fw-semibold">Name</label><input class="form-control" name="name_display" value="{{ faculty.name_display }}" required></div>
+      <div class="col-md-6"><label class="form-label small fw-semibold">Institution</label><input class="form-control" name="institution" value="{{ faculty.institution }}" required></div>
+      <div class="col-md-6"><label class="form-label small fw-semibold">Department</label><input class="form-control" name="department" value="{{ faculty.department }}" required></div>
+      <div class="col-md-6"><label class="form-label small fw-semibold">Designation</label><input class="form-control" name="designation" value="{{ faculty.designation }}" required></div>
+      <div class="col-md-6"><label class="form-label small fw-semibold">Experience (years)</label><input class="form-control" type="number" min="0" name="experience_years" value="{{ faculty.experience_years }}"></div>
+      <div class="col-12"><label class="form-label small fw-semibold">Expertise areas</label><input class="form-control" name="expertise_areas" value="{{ faculty.expertise_areas|join(', ') }}"></div>
+      <div class="col-12"><label class="form-label small fw-semibold">Research interests</label><input class="form-control" name="research_interests" value="{{ faculty.research_interests|join(', ') }}"></div>
+      <div class="col-md-6"><label class="form-label small fw-semibold">Academic profile URL</label><input class="form-control" type="url" name="linkedin_url" value="{{ faculty.linkedin_url or '' }}"></div>
+      <div class="col-md-6"><label class="form-label small fw-semibold">Website</label><input class="form-control" type="url" name="website_url" value="{{ faculty.website_url or '' }}"></div>
+      <div class="col-12"><button class="btn btn-sb-primary" type="submit">Save faculty profile</button></div>
+    </form>
+  </div></div>
+  <div class="col-lg-4"><div class="card card-sb p-4 h-100"><h6 class="fw-bold">Faculty snapshot</h6><p class="text-muted small">{{ faculty.institution }}</p><div class="d-flex gap-2 flex-wrap mb-4">{% for item in faculty.expertise_areas %}<span class="badge bg-light text-dark border">{{ item }}</span>{% endfor %}</div><div class="row text-center"><div class="col-6"><div class="fs-3 fw-bold text-primary">{{ collabs_count }}</div><div class="small text-muted">Collaborations</div></div><div class="col-6"><div class="fs-3 fw-bold text-success">{{ active_collabs }}</div><div class="small text-muted">Active</div></div></div></div></div>
+</div>
+{% endblock %}
