@@ -12,7 +12,10 @@ class Config:
     # Vercel's deployed bundle is read-only. Use its writable temporary directory
     # for the prototype database and uploads when running as a serverless function.
     DEFAULT_DB_PATH = os.path.join('/tmp' if IS_VERCEL else BASE_DIR, 'skillbridge.db')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DB_URL', f"sqlite:///{DEFAULT_DB_PATH}")
+    raw_db_url = os.environ.get('DATABASE_URL') or os.environ.get('DB_URL', f"sqlite:///{DEFAULT_DB_PATH}")
+    if raw_db_url.startswith("postgres://"):
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = raw_db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     UPLOAD_FOLDER = os.path.join('/tmp' if IS_VERCEL else BASE_DIR, 'storage', 'resumes')
