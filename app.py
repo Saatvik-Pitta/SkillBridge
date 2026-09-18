@@ -5,6 +5,10 @@ from models import db, Notification
 from auth import get_current_user, DEMO_ACCOUNTS
 from routes import auth_bp, student_bp, industry_bp, academician_bp, institution_bp
 
+# Explicit module-level Flask instance for deployment autodetection.
+app = Flask(__name__)
+
+
 def create_app(config_class=Config, flask_app=None):
     app = flask_app or Flask(__name__)
     app.config.from_object(config_class)
@@ -81,9 +85,7 @@ def create_app(config_class=Config, flask_app=None):
     return app
 
 
-# Deployment platforms import this module and look for this explicit top-level
-# Flask instance. The factory configures the same object for local and hosted use.
-app = Flask(__name__)
+# Configure the explicit module-level instance for local and hosted use.
 create_app(Config, app)
 
 
