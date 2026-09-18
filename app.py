@@ -5,8 +5,8 @@ from models import db, Notification
 from auth import get_current_user, DEMO_ACCOUNTS
 from routes import auth_bp, student_bp, industry_bp, academician_bp, institution_bp
 
-def create_app(config_class=Config):
-    app = Flask(__name__)
+def create_app(config_class=Config, flask_app=None):
+    app = flask_app or Flask(__name__)
     app.config.from_object(config_class)
 
     # Initialize extensions
@@ -80,8 +80,15 @@ def create_app(config_class=Config):
 
     return app
 
+
+# Deployment platforms import this module and look for this explicit top-level
+# Flask instance. The factory configures the same object for local and hosted use.
+app = Flask(__name__)
+create_app(Config, app)
+
+
 if __name__ == '__main__':
-    app = create_app()
     port = int(os.environ.get('API_PORT', 5000))
     print(f"SkillBridge starting on http://127.0.0.1:{port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    debug = os.environ.get('FLASK_DEBUG', '').lower() in {'1', 'true', 'yes'}
+    app.run(host='0.0.0.0', port=port, debug=debug, use_reloader=False)
